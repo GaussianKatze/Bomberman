@@ -8,8 +8,8 @@ public class Map
   private int tileSize;
   private ArrayList<Bomb> bombList;
   private ArrayList<BombFireGroup> bombFireList;
-  private int fireFuse = 4; // default fuse for fire, can be changed later
-  private int bombFuse = 2; // default fuse for bomb, can be changed later
+  private int fireFuse = 60; // default fuse for fire, can be changed later
+  private int bombFuse = 180; // default fuse for bomb, can be changed later
   private int bombPower = 2; // default power for bomb, can be changed later
   private int currentTick = 0; // tick counter for game ticks
   private int ticksPerSecond = 60; // number of ticks per second, can be changed later
@@ -41,7 +41,7 @@ public class Map
             field[row][col] = new Tile(); // Tile the empty spaces
           }
         } else if ((row == 1 && col == 1) || (row == field.length - 2 && col == field[0].length - 2)) {
-          field[row][col] = new SpawnTile(); // Tile the spawns
+          field[row][col] = new Tile(); // Tile the spawns (removed for now)
         } else {
           field[row][col] = new Tile(); // Tile the guaranteed empty spaces arond spawn
         }
@@ -116,8 +116,7 @@ public class Map
       return false; // out of bounds
     }
     return !field[row][col].getSolid();
-  }
-  public int getTileSize() {
+  }lic int getTileSize() {
     return tileSize;
   }
   public ArrayList<Bomb> getBombList() {
@@ -147,10 +146,10 @@ public class Map
   }
   //Converter
   public int rowToY( int row) {
-    return (int)((row)*tileSize);
+    return row * tileSize;
   }
   public int colToX(int col) {
-    return (int)((col)*tileSize);
+    return col * tileSize;
   }
   //Lazy
   public boolean withinR(int r) {
@@ -205,10 +204,12 @@ public void addBombFire(BombFireGroup group, int row, int col) {
 }
   //EXPLOSIONS
   public void addBomb(int row, int col) {
-    Bomb bomb = new Bomb(row, col);
-    setTile(row, col, bomb);
-    bombList.add(bomb);
-}
+    if (!field[row][col].getTileType().equals("Bomb")) { // check if the tile is not already a bomb
+      Bomb bomb = new Bomb(row, col);
+      setTile(row, col, bomb);
+      bombList.add(bomb);
+    }
+  }
   public void explodeCheck() {
     // 1. Tick all bombs ONCE
     for (int i = 0; i < bombList.size(); i++) {
@@ -261,6 +262,8 @@ public void addBombFire(BombFireGroup group, int row, int col) {
     Bomb targetBomb = (Bomb)field[r-num][c];
     targetBomb.detonate();
 } else if (field[r-num][c].getBreakable() == true) {
+    //setTile(r-num, c, new Tile()); //This "explodes" walls
+    //field[r-num][c].breakTile();
    //setTile(r-num, c, new Tile()); //This "explodes" walls
    addBombFire(group, r-num, c);
 }
@@ -281,6 +284,8 @@ public void addBombFire(BombFireGroup group, int row, int col) {
     targetBomb.detonate();
 } else if (field[r+num][c].getBreakable() == true) {
     //setTile(r+num, c, new Tile());
+    //field[r+num][c].breakTile();
+    //setTile(r+num, c, new Tile());
     addBombFire(group, r+num, c);
 }
           }
@@ -300,6 +305,8 @@ public void addBombFire(BombFireGroup group, int row, int col) {
     targetBomb.detonate();
 } else if (field[r][c-num].getBreakable() == true) {
   //setTile(r, c-num, new Tile());
+  //field[r][c-num].breakTile();
+  //setTile(r, c-num, new Tile());
   addBombFire(group, r, c-num);
 }
           }
@@ -318,6 +325,8 @@ public void addBombFire(BombFireGroup group, int row, int col) {
     Bomb targetBomb = (Bomb)field[r][c+num];
     targetBomb.detonate();
 } else if (field[r][c+num].getBreakable() == true) {
+    //setTile(r, c+num, new Tile());
+    //field[r][c+num].breakTile();
     //setTile(r, c+num, new Tile());
     addBombFire(group, r, c+num);
 }
